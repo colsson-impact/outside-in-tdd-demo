@@ -1,14 +1,16 @@
 package com.impact.outside_in_tdd_demo.contract.domain;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.javamoney.moneta.Money;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 
 class ContractTest {
 
     @Test
-    void essenceBrandId(){
+    void essenceBrandId() {
 
         BrandId brandId = BrandId.newId();
         PartnerId partnerId = PartnerId.newId();
@@ -20,13 +22,23 @@ class ContractTest {
     }
 
     @Test
-    void saleAmountOf1000CommissionOf10Percent(){
+    void saleAmountOf1000CommissionOf10Percent() {
         BrandId brandId = BrandId.newId();
         PartnerId partnerId = PartnerId.newId();
 
         Contract contract = Contract.propose(brandId, partnerId, Percentage.getInstanceOf(10));
 
-        assertEquals(100.0, contract.commission(1000));
+        assertEquals(hundredEuros(), contract.commission(thousandEuros()));
+    }
+
+    @NotNull
+    private static Money hundredEuros() {
+        return Money.of(100.0, "EUR");
+    }
+
+    @NotNull
+    private static Money thousandEuros() {
+        return Money.of(1000, "EUR");
     }
 
 

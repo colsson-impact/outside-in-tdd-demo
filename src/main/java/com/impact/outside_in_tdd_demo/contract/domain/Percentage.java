@@ -1,5 +1,7 @@
 package com.impact.outside_in_tdd_demo.contract.domain;
 
+import org.javamoney.moneta.Money;
+
 public class Percentage {
 
     public static final Percentage ZERO = new Percentage(0);
@@ -25,6 +27,10 @@ public class Percentage {
 
     public double of(double amount) {
         return amount * value / 100;
+    }
+
+    public Money of(Money amount) {
+        return amount.multiply(value).divide(100);
     }
 
     public double getValue() {

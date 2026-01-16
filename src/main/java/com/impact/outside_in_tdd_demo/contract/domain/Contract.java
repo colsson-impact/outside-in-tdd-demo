@@ -1,5 +1,8 @@
 package com.impact.outside_in_tdd_demo.contract.domain;
 
+import org.javamoney.moneta.Money;
+
+
 public class Contract {
 
     public record ContractEssence(ContractId contractId, BrandId brandId, PartnerId partnerId, Percentage commissionPercentage) {
@@ -30,7 +33,7 @@ public class Contract {
         return new Contract(brandId, partnerId, commissionPercentage);
     }
 
-    public double commission(double saleAmount) {
+    public Money commission(Money saleAmount) {
         return commissionPercentage.of(saleAmount);
     }
 

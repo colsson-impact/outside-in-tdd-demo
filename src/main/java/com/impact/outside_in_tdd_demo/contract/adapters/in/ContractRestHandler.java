@@ -2,10 +2,10 @@ package com.impact.outside_in_tdd_demo.contract.adapters.in;
 
 import java.util.NoSuchElementException;
 
+import org.javamoney.moneta.Money;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,14 +60,17 @@ public class ContractRestHandler {
     }
 
     @GetMapping("/{contractId}/commission")
-    public CommissionContractResponse calculateCommission(@PathVariable String contractId, @RequestParam double saleAmount) {
-        return contractCommissionUseCase.calculateCommission(ContractId.fromString(contractId), saleAmount)
-                .map(commission -> mapToResponse(ContractId.fromString(contractId), saleAmount, commission))
+    public CommissionContractResponse calculateCommission(@PathVariable String contractId, @RequestParam double saleAmount, @RequestParam String currency) {
+
+        Money saleAmountMoney = Money.of(saleAmount, currency);
+
+        return contractCommissionUseCase.calculateCommission(ContractId.fromString(contractId), saleAmountMoney)
+                .map(commission -> mapToResponse(ContractId.fromString(contractId), saleAmountMoney, commission))
                 .orElseThrow(() -> new NoSuchElementException("Contract not found case not implemented"));
     }
 
-    private static CommissionContractResponse mapToResponse(ContractId contractId, double saleAmount, double commission) {
-        return new CommissionContractResponse(contractId.val(), saleAmount, commission);
+    private static CommissionContractResponse mapToResponse(ContractId contractId, Money saleAmount, Money commission) {
+        return new CommissionContractResponse(contractId.val(), saleAmount.getNumber().doubleValue(), commission.getNumber().doubleValue());
     }
 
 

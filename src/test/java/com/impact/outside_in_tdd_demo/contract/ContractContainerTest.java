@@ -28,31 +28,32 @@ public class ContractContainerTest {
 
     @Test
     void proposeContract() throws Exception {
-        String contractJson = "{ \"brandId\": \"0ffeeb95-eb61-443a-98ea-5ba61f532bc4\", " +
-                "\"partnerId\": \"6ea4bf54-a8cc-4db5-b4d5-b6dac5154caf\", " +
-                "\"commissionPercentage\": 10.5 }";
+        String contractJson = """
+                {
+                    "brandId": "0ffeeb95-eb61-443a-98ea-5ba61f532bc4",
+                    "partnerId": "6ea4bf54-a8cc-4db5-b4d5-b6dac5154caf",
+                    "commissionPercentage": 10.5
+                }
+                """;
 
 
-        mockMvc.perform(post("/contracts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(contractJson))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists());
+        mockMvc.perform(post("/contracts").contentType(MediaType.APPLICATION_JSON).content(contractJson)).andExpect(status().isOk()).andExpect(jsonPath("$.id").exists());
 
     }
 
     @Test
     void proposeAndRetrieveContract() throws Exception {
-        String contractJson = "{ \"brandId\": \"0ffeeb95-eb61-443a-98ea-5ba61f532bc4\", " +
-                "\"partnerId\": \"6ea4bf54-a8cc-4db5-b4d5-b6dac5154caf\", " +
-                "\"commissionPercentage\": 10.5 }";
+        String contractJson = """
+                {
+                    "brandId": "0ffeeb95-eb61-443a-98ea-5ba61f532bc4",
+                    "partnerId": "6ea4bf54-a8cc-4db5-b4d5-b6dac5154caf",
+                    "commissionPercentage": 10.5
+                }
+                """;
 
 
 
-        MvcResult result = mockMvc.perform(post("/contracts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(contractJson))
-                .andExpect(status().isOk()).andReturn();
+        MvcResult result = mockMvc.perform(post("/contracts").contentType(MediaType.APPLICATION_JSON).content(contractJson)).andExpect(status().isOk()).andReturn();
 
         String contractId = JsonPath.parse(result.getResponse().getContentAsString()).read("$.id");
 
@@ -68,19 +69,19 @@ public class ContractContainerTest {
 
     @Test
     void contractCommission() throws Exception {
-        String contractJson = "{ \"brandId\": \"0ffeeb95-eb61-443a-98ea-5ba61f532bc4\", " +
-                "\"partnerId\": \"6ea4bf54-a8cc-4db5-b4d5-b6dac5154caf\", " +
-                "\"commissionPercentage\": 10.5 }";
+        String contractJson = """
+                {
+                    "brandId": "0ffeeb95-eb61-443a-98ea-5ba61f532bc4",
+                    "partnerId": "6ea4bf54-a8cc-4db5-b4d5-b6dac5154caf",
+                    "commissionPercentage": 10.5
+                }
+                """;
 
-        MvcResult result = mockMvc.perform(post("/contracts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(contractJson))
-                .andExpect(status().isOk()).andReturn();
+        MvcResult result = mockMvc.perform(post("/contracts").contentType(MediaType.APPLICATION_JSON).content(contractJson)).andExpect(status().isOk()).andReturn();
 
         String contractId = JsonPath.parse(result.getResponse().getContentAsString()).read("$.id");
 
-        mockMvc.perform(get("/contracts/" + contractId + "/commission")
-                        .param("saleAmount", "1000"))
+        mockMvc.perform(get("/contracts/" + contractId + "/commission").param("saleAmount", "1000").param("currency", "SEK"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.commission").exists());
 

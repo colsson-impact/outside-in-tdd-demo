@@ -1,8 +1,8 @@
 package com.impact.outside_in_tdd_demo.contract.application;
 
-import java.util.Date;
 import java.util.Optional;
 
+import org.javamoney.moneta.Money;
 import org.springframework.stereotype.Service;
 
 import com.impact.outside_in_tdd_demo.contract.application.port.in.ContractCommissionUseCase;
@@ -45,7 +45,7 @@ public class ContractApplicationService implements ProposeContractUseCase, GetCo
     }
 
     @Override
-    public Optional<Double> calculateCommission(ContractId contractId, double saleAmount) {
+    public Optional<Money> calculateCommission(ContractId contractId, Money saleAmount) {
         return contractUnHibernator.awaken(contractId).map(contract -> contract.commission(saleAmount));
     }
 }

@@ -11,6 +11,7 @@ import com.impact.outside_in_tdd_demo.contract.application.port.out.ContractUnHi
 import com.impact.outside_in_tdd_demo.contract.domain.Contract;
 import com.impact.outside_in_tdd_demo.contract.domain.ContractId;
 
+
 @Repository
 public class InMemContractRepo implements ContractHibernator, ContractUnHibernator {
 
@@ -18,12 +19,12 @@ public class InMemContractRepo implements ContractHibernator, ContractUnHibernat
 
     @Override
     public void hibernate(Contract contract) {
-       contracts.put(contract.getId(), contract);
+        contracts.put(contract.getId(), contract);
     }
 
 
     @Override
     public Optional<Contract> awaken(ContractId contractId) {
-        return contracts.containsKey(contractId) ? Optional.of(contracts.get(contractId)) : Optional.empty();
+        return Optional.ofNullable(contracts.get(contractId));
     }
 }
