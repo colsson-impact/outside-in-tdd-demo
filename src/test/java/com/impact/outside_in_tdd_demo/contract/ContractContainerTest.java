@@ -1,29 +1,33 @@
 package com.impact.outside_in_tdd_demo.contract;
 
-import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import com.jayway.jsonpath.JsonPath;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 public class ContractContainerTest {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private MockMvc mockMvc;
 
 
     @Test
-    void proposeContract() {
+    void proposeContract() throws Exception {
         String contractJson = """
                 {
                     "brandId": "0ffeeb95-eb61-443a-98ea-5ba61f532bc4",
@@ -32,18 +36,13 @@ public class ContractContainerTest {
                 }
                 """;
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> request = new HttpEntity<>(contractJson, headers);
 
-        ResponseEntity<Map> response = restTemplate.postForEntity("/contracts", request, Map.class);
+        mockMvc.perform(post("/contracts").contentType(MediaType.APPLICATION_JSON).content(contractJson)).andExpect(status().isOk()).andExpect(jsonPath("$.id").exists());
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).containsKey("id");
     }
 
     @Test
-    void proposeAndRetrieveContract() {
+    void proposeAndRetrieveContract() throws Exception {
         String contractJson = """
                 {
                     "brandId": "0ffeeb95-eb61-443a-98ea-5ba61f532bc4",
@@ -52,24 +51,24 @@ public class ContractContainerTest {
                 }
                 """;
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> request = new HttpEntity<>(contractJson, headers);
 
-        ResponseEntity<Map> createResponse = restTemplate.postForEntity("/contracts", request, Map.class);
-        String contractId = (String) createResponse.getBody().get("id");
 
-        ResponseEntity<Map> getResponse = restTemplate.getForEntity("/contracts/" + contractId, Map.class);
+        MvcResult result = mockMvc.perform(post("/contracts").contentType(MediaType.APPLICATION_JSON).content(contractJson)).andExpect(status().isOk()).andReturn();
 
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(getResponse.getBody().get("id")).isEqualTo(contractId);
-        assertThat(getResponse.getBody().get("brandId")).isEqualTo("0ffeeb95-eb61-443a-98ea-5ba61f532bc4");
-        assertThat(getResponse.getBody().get("partnerId")).isEqualTo("6ea4bf54-a8cc-4db5-b4d5-b6dac5154caf");
-        assertThat(getResponse.getBody().get("commissionPercentage")).isEqualTo(10.5);
+        String contractId = JsonPath.parse(result.getResponse().getContentAsString()).read("$.id");
+
+
+        mockMvc.perform(get("/contracts/" + contractId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(contractId))
+                .andExpect(jsonPath("$.brandId").value("0ffeeb95-eb61-443a-98ea-5ba61f532bc4"))
+                .andExpect(jsonPath("$.partnerId").value("6ea4bf54-a8cc-4db5-b4d5-b6dac5154caf"))
+                .andExpect(jsonPath("$.commissionPercentage").value(10.5));
+
     }
 
     @Test
-    void contractCommission() {
+    void contractCommission() throws Exception {
         String contractJson = """
                 {
                     "brandId": "0ffeeb95-eb61-443a-98ea-5ba61f532bc4",
@@ -78,18 +77,14 @@ public class ContractContainerTest {
                 }
                 """;
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> request = new HttpEntity<>(contractJson, headers);
+        MvcResult result = mockMvc.perform(post("/contracts").contentType(MediaType.APPLICATION_JSON).content(contractJson)).andExpect(status().isOk()).andReturn();
 
-        ResponseEntity<Map> createResponse = restTemplate.postForEntity("/contracts", request, Map.class);
-        String contractId = (String) createResponse.getBody().get("id");
+        String contractId = JsonPath.parse(result.getResponse().getContentAsString()).read("$.id");
 
-        ResponseEntity<Map> commissionResponse = restTemplate.getForEntity(
-                "/contracts/" + contractId + "/commission?saleAmount=1000&currency=SEK", Map.class);
+        mockMvc.perform(get("/contracts/" + contractId + "/commission").param("saleAmount", "1000").param("currency", "SEK"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.commission").exists());
 
-        assertThat(commissionResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(commissionResponse.getBody()).containsKey("commission");
     }
 
 
