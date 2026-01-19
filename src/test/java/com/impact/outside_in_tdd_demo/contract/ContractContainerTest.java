@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import com.jayway.jsonpath.JsonPath;
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @AutoConfigureMockMvc
 public class ContractContainerTest {
 
